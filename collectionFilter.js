@@ -30,8 +30,8 @@ export default class CollectionFilter {
                     } else if(paramKeys[i] == "limit") {
                         if(paramKeys[i+1] == "offset") {
                             try {
-                                let noLimit = this.params[paramKeys[i]];
-                                let noOffset = this.params[paramKeys[i+1]];
+                                let noLimit = Number.parseInt(this.params[paramKeys[i]]);
+                                let noOffset = Number.parseInt(this.params[paramKeys[i+1]]);
                                 objectsList = objectsList.splice((noLimit*(noOffset+1)),noLimit);
                                 i++;
                             } catch (error) {
