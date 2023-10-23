@@ -51,9 +51,12 @@ export default class CollectionFilter {
                         });
 
                         if (deleteParamList.length != 0) {
-                            deleteParamList.forEach(deleteParam => {
-                                delete objectsList[deleteParam];
+                            objectsList.forEach(listedObject => {
+                                deleteParamList.forEach(deleteParam => {
+                                    delete listedObject[deleteParam];
+                                });
                             });
+                            
                             modelFields = newParamList;
                         }
                     }
