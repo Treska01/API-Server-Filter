@@ -6,44 +6,61 @@ export default class CollectionFilter {
     }
     get() {
         let objectsList = this.objects;
-        let objectKeys = Object.keys(objectsList);
-        let paramKeys = Object.keys(this.params);
+        let modelFields = [];
+        for (let i = 0; i < this.model.fields.length; i++) {
+            modelFields[i] = this.model.fields[i]["name"];
+        }
+        
+        if(this.params != null) {
+            let paramKeys = Object.keys(this.params);
 
-        if (paramKeys.length != 0) {
-            for (let i = 0; i < paramKeys.length; i++) {
-                if(objectKeys.includes(paramKeys[i])) {
-                    objectsList = objectsList.filter(obj => this.valueMatch(obj[paramKeys[i]],this.params[paramKeys[i]]));
-                } else if(paramKeys[i] == "sort") {
-                    let sorting = this.params[paramKeys[i]];
-                    
-                    if (sorting.endsWith(",desc")) {
-                        sorting = sorting.slice(0, -5);
-                        objectsList.sort((a, b) => !this.innerCompare(a[sorting], b[sorting]));
-                    } else {
-                        objectsList.sort((a, b) => this.innerCompare(a[sorting], b[sorting]));
-                    }
-                } else if(paramKeys[i] == "limit") {
-                    if(paramKeys[i+1] == "offset") {
-                        try {
-                            objectsList = objectsList.splice(this.params[paramKeys[i],this.params[paramKeys[i+1]]]);
-                            i++;
-                        } catch (error) {
-                            //do nothing
+            if (paramKeys.length != 0) {
+                for (let i = 0; i < paramKeys.length; i++) {
+                    if(modelFields.includes(paramKeys[i])) {
+                        objectsList = objectsList.filter(obj => this.valueMatch(obj[paramKeys[i]],this.params[paramKeys[i]]));
+                    } else if(paramKeys[i] == "sort") {
+                        let sorting = this.params[paramKeys[i]];
+                        
+                        if (sorting.endsWith(",desc")) {
+                            sorting = sorting.slice(0, -5);
+                            objectsList.sort((a, b) => -(this.innerCompare(a[sorting], b[sorting])));
+                        } else {
+                            objectsList.sort((a, b) => this.innerCompare(a[sorting], b[sorting]));
+                        }
+                    } else if(paramKeys[i] == "limit") {
+                        if(paramKeys[i+1] == "offset") {
+                            try {
+                                objectsList = objectsList.splice(this.params[paramKeys[i],this.params[paramKeys[i+1]]]);
+                                i++;
+                            } catch (error) {
+                                //do nothing
+                            }
+                        }
+                    } else if(paramKeys[i] == "field" ||
+                            paramKeys[i] == "fields") {
+                        let paramFields = this.params[paramKeys[i]].split(",");
+                        let deleteParamList = [];
+                        let newParamList = [];
+
+                        modelFields.forEach(modelField => {
+                            if(paramFields.includes(modelField)) {
+                                newParamList.push(modelField);
+                            } else {
+                                deleteParamList.push(modelField);
+                            }
+                        });
+
+                        if (deleteParamList.length != 0) {
+                            deleteParamList.forEach(deleteParam => {
+                                delete objectsList[deleteParam];
+                            });
+                            modelFields = newParamList;
                         }
                     }
-                } else if(paramKeys[i] == "field" ||
-                        paramKeys[i] == "fields") {
-                    let fields = this.params[paramKeys[i]].split(",");
-
-                    for (let j = 0; j < objectKeys.length; j++) {
-                        if(!fields.contains(objectKeys[j])) {
-                            delete objectKeys[objectKeys[j]];
-                        }
-                    }
-                    objectKeys = Object.keys(objectsList);
                 }
             }
         }
+        
 
         return objectsList;
     }
