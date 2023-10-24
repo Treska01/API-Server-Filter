@@ -66,6 +66,14 @@ export default class CollectionFilter {
             }
         }
         
+        for (let k = 0; k < objectsList.length-1; k++) {
+            for (let l = k+1; l < objectsList.length; l++) {
+                if (this.equal(objectsList[k],objectsList[l])) {
+                    objectsList = objectsList.slice(l);
+                    l--;
+                }
+            }
+        }
 
         return objectsList;
     }
@@ -88,5 +96,13 @@ export default class CollectionFilter {
             return x.localeCompare(y);
         else
             return this.compareNum(x, y);
+    }
+    equal(ox, oy) {
+        Object.keys(ox).forEach(function (member) {
+            if (ox[member] != oy[member]) {
+                return false;
+            }
+        })
+        return true;
     }
 }
